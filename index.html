@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 <title>Push-Up Counter</title>
 
@@ -28,9 +29,6 @@ body {
 }
 
 body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: white;
   user-select: none;
   -webkit-user-select: none;
@@ -60,7 +58,7 @@ body {
     filter 0.08s ease;
 }
 
-/* Subtle press effect */
+/* Press effect */
 #app:active {
   transform: scale(0.985);
   filter: brightness(1.15);
@@ -151,7 +149,17 @@ body {
 <script>
 
 let count = 0;
-let armed = true;
+
+/*
+  Time of the last counted touch.
+*/
+let lastCountTime = 0;
+
+/*
+  Minimum time between two counted touches.
+  200 milliseconds = 0.2 seconds.
+*/
+const MIN_INTERVAL = 200;
 
 const app = document.getElementById("app");
 const counter = document.getElementById("count");
@@ -161,22 +169,27 @@ function updateCounter() {
   counter.textContent = count;
 }
 
-/* Count one push-up */
+/*
+  Count a push-up when the screen is touched.
+*/
 app.addEventListener("pointerdown", function(event) {
 
   event.preventDefault();
 
+  const now = performance.now();
+
   /*
-    Prevent multiple counts while
-    the nose is still touching the screen.
+    Ignore the touch if it happens
+    less than 200 ms after the
+    previous counted touch.
   */
-  if (!armed) {
+  if (now - lastCountTime < MIN_INTERVAL) {
     return;
   }
 
-  armed = false;
-
   count++;
+
+  lastCountTime = now;
 
   updateCounter();
 
@@ -184,18 +197,6 @@ app.addEventListener("pointerdown", function(event) {
   if (navigator.vibrate) {
     navigator.vibrate(12);
   }
-});
-
-/*
-  Arm the counter again when
-  the nose leaves the screen.
-*/
-window.addEventListener("pointerup", function() {
-  armed = true;
-});
-
-window.addEventListener("pointercancel", function() {
-  armed = true;
 });
 
 </script>
